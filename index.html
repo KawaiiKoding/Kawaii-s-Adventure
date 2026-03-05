@@ -129,6 +129,24 @@ function loop() {
 }
 
 loop();
+  <canvas id="game" width="800" height="500"></canvas>
+<script>
+const c = document.getElementById("game");
+const x = c.getContext("2d");
+
+// sky
+x.fillStyle = "skyblue";
+x.fillRect(0,0,800,500);
+
+// ground
+x.fillStyle = "brown";
+x.fillRect(0,450,800,50);
+
+// player
+x.fillStyle = "hotpink";
+x.fillRect(100,400,50,50);
+</script>
+
 </script>
 </body>
 </html>

@@ -3,123 +3,76 @@
 <head>
 <title>Kawaii's Adventure</title>
 <style>
-  body { margin:0; background:#87CEFA; }
-  canvas { display:block; margin:0 auto; background:#87CEFA; }
+  body { margin:0; }
+  canvas { background:#87CEFA; display:block; margin:0 auto; }
 </style>
 </head>
 <body>
 <canvas id="game" width="900" height="500"></canvas>
 
 <script>
+// --- SAFETY CHECK: SHOW ERRORS ON SCREEN ---
+window.onerror = function(msg, url, line) {
+  document.body.innerHTML = "<h1 style='color:red;'>ERROR:</h1><p>" + msg + "</p>";
+};
+
+// --- SETUP ---
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// CONSTANTS
-const GRAVITY = 0.6;
-const SPEED = 5;
-const JUMP = 14;
+// --- PLAYER ---
+const player = { x: 100, y: 300, w: 80, h: 80, vy: 0, onGround: false };
 
-// PLAYER
-const player = {
-  x: 100,
-  y: 100,
-  w: 40,
-  h: 40,
-  vx: 0,
-  vy: 0,
-  onGround: false
-};
-
-// LEVEL (visible platforms)
-const level = [
-  [0, 450, 3000, 50],
-  [200, 380, 150, 20],
-  [450, 320, 150, 20],
-  [700, 260, 150, 20],
-  [1000, 380, 150, 20],
-  [1300, 320, 150, 20],
-  [1600, 260, 150, 20],
-  [1900, 380, 150, 20],
-  [2200, 320, 150, 20],
-  [2500, 260, 150, 20]
+// --- LEVEL ---
+const platforms = [
+  { x: 0, y: 450, w: 2000, h: 50 },
+  { x: 300, y: 350, w: 200, h: 30 },
+  { x: 700, y: 300, w: 200, h: 30 }
 ];
 
-let cameraX = 0;
-
-// INPUT
+// --- INPUT ---
 const keys = {};
 document.addEventListener("keydown", e => keys[e.code] = true);
 document.addEventListener("keyup", e => keys[e.code] = false);
 
-// UPDATE LOOP
+// --- GAME LOOP ---
 function update() {
-  player.vx = 0;
-
-  if (keys["ArrowLeft"]) player.vx = -SPEED;
-  if (keys["ArrowRight"]) player.vx = SPEED;
-
-  if (keys["Space"] && player.onGround) {
-    player.vy = -JUMP;
-    player.onGround = false;
-  }
-
-  player.vy += GRAVITY;
-  player.x += player.vx;
+  // gravity
+  player.vy += 0.5;
   player.y += player.vy;
 
+  // simple collision
   player.onGround = false;
+  for (let p of platforms) {
+    if (player.x < p.x + p.w &&
+        player.x + player.w > p.x &&
+        player.y < p.y + p.h &&
+        player.y + player.h > p.y) {
 
-  // COLLISION
-  for (let p of level) {
-    let [px, py, pw, ph] = p;
-
-    if (player.x < px + pw &&
-        player.x + player.w > px &&
-        player.y < py + ph &&
-        player.y + player.h > py) {
-
-      if (player.vy > 0) {
-        player.y = py - player.h;
-        player.vy = 0;
-        player.onGround = true;
-      }
+      player.y = p.y - player.h;
+      player.vy = 0;
+      player.onGround = true;
     }
   }
 
-  // CAMERA
-  cameraX = player.x - canvas.width / 2;
+  // jump
+  if (keys["Space"] && player.onGround) {
+    player.vy = -12;
+  }
 }
 
-// DRAW LOOP
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.save();
-  ctx.translate(-cameraX, 0);
-
-  // SKY
-  ctx.fillStyle = "#87CEFA";
-  ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
-
-  // GROUND + PLATFORMS
-  for (let p of level) {
-    ctx.fillStyle = "#8B4513";
-    ctx.fillRect(p[0], p[1], p[2], p[3]);
-
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(p[0], p[1], p[2], p[3]);
+  // platforms
+  ctx.fillStyle = "brown";
+  for (let p of platforms) {
+    ctx.fillRect(p.x, p.y, p.w, p.h);
   }
 
-  // PLAYER (bright pink)
-  ctx.fillStyle = "#FF69B4";
+  // player
+  ctx.fillStyle = "hotpink";
   ctx.fillRect(player.x, player.y, player.w, player.h);
-
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(player.x, player.y, player.w, player.h);
-
-  ctx.restore();
 }
 
 function loop() {
@@ -129,22 +82,6 @@ function loop() {
 }
 
 loop();
-  <canvas id="game" width="800" height="500"></canvas>
-<script>
-const c = document.getElementById("game");
-const x = c.getContext("2d");
-
-// sky
-x.fillStyle = "skyblue";
-x.fillRect(0,0,800,500);
-
-// ground
-x.fillStyle = "brown";
-x.fillRect(0,450,800,50);
-
-// player
-x.fillStyle = "hotpink";
-x.fillRect(100,400,50,50);
 </script>
 </body>
 </html>
